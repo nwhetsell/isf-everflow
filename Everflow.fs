@@ -102,14 +102,14 @@ vec3 bN(vec2 p)
 
 uint pack(vec2 x)
 {
-    x = 65534.0*clamp(0.5*x+0.5, 0., 1.);
+    x = 65534.0*x;
     return uint(round(x.x)) + 65535u*uint(round(x.y));
 }
 
 vec2 unpack(uint a)
 {
     vec2 x = vec2(a%65535u, a/65535u);
-    return clamp(x/65534.0, 0.,1.)*2.0 - 1.0;
+    return x/65534.0;
 }
 
 #ifdef VIDEOSYNC
@@ -117,15 +117,17 @@ uint floatBitsToUint(float x);
 float uintBitsToFloat(uint x);
 #endif
 
+#define POST_UNPACK(X) (clamp(X, 0., 1.) * 2. - 1.)
 vec2 decode(float x)
 {
     uint X = floatBitsToUint(x);
-    return unpack(X);
+    return POST_UNPACK(unpack(X));
 }
 
+#define PRE_PACK(X) clamp(0.5 * X + 0.5, 0., 1.)
 float encode(vec2 x)
 {
-    uint X = pack(x);
+    uint X = pack(PRE_PACK(x));
     return uintBitsToFloat(X);
 }
 
