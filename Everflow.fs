@@ -42,15 +42,6 @@
 // ShaderToy Common
 //
 
-#define Bf(p) mod(p,R)
-#define Bi(p) ivec2(mod(p,R))
-#define texel(a, p) texelFetch(a, Bi(p), 0)
-#define pixel(a, p) texture(a, (p)/R)
-#define ch0 iChannel0
-#define ch1 iChannel1
-#define ch2 iChannel2
-#define ch3 iChannel3
-
 #define loop(i,x) for(int i = 0; i < x; i++)
 #define range(i,a,b) for(int i = a; i <= b; i++)
 
@@ -200,7 +191,7 @@ void Reintegration(sampler2D ch, inout particle P, vec2 pos)
     range(i, -2, 2) range(j, -2, 2)
     {
         vec2 tpos = pos + vec2(i,j);
-        vec4 data = texel(ch, tpos);
+        vec4 data = texelFetch(ch, ivec2(mod(tpos, R)), 0);
 
         particle P0 = getParticle(data, tpos);
 
@@ -238,7 +229,7 @@ void Simulation(sampler2D ch, inout particle P, vec2 pos)
     range(i, -2, 2) range(j, -2, 2)
     {
         vec2 tpos = pos + vec2(i,j);
-        vec4 data = texel(ch, tpos);
+        vec4 data = texelFetch(ch, ivec2(mod(tpos, R)), 0);
         particle P0 = getParticle(data, tpos);
         vec2 dx = P0.X - P.X;
         float avgP = 0.5*P0.M.x*(Pf(P.M) + Pf(P0.M));
@@ -281,7 +272,7 @@ void Simulation(sampler2D ch, inout particle P, vec2 pos)
 
 vec4 V(vec2 p)
 {
-    return pixel(bufferC, p);
+    return texture(bufferC, p/R);
 }
 
 
@@ -299,7 +290,7 @@ void main()
         // Mouse = iMouse;
         ivec2 p = ivec2(pos);
 
-        vec4 data = texel(bufferB, pos);
+        vec4 data = texelFetch(bufferB, ivec2(mod(pos, R)), 0);
 
         particle P;// = getParticle(data, pos);
         P.X = vec2(0);
@@ -335,7 +326,7 @@ void main()
         //Mouse = iMouse;
         ivec2 p = ivec2(pos);
 
-        vec4 data = texel(bufferA, pos);
+        vec4 data = texelFetch(bufferA, ivec2(mod(pos, R)), 0);
 
         particle P = getParticle(data, pos);
 
@@ -353,7 +344,7 @@ void main()
         R = iResolution.xy; time = iTime;
         ivec2 p = ivec2(pos);
 
-        vec4 data = texel(bufferA, pos);
+        vec4 data = texelFetch(bufferA, ivec2(mod(pos, R)), 0);
         particle P = getParticle(data, pos);
 
         //particle render
@@ -361,7 +352,7 @@ void main()
         range(i, -1, 1) range(j, -1, 1)
         {
             vec2 ij = vec2(i,j);
-            vec4 data = texel(bufferA, pos + ij);
+            vec4 data = texelFetch(bufferA, ivec2(mod(pos + ij, R)), 0);
             particle P0 = getParticle(data, pos + ij);
 
             vec2 x0 = P0.X; //update position
@@ -377,7 +368,7 @@ void main()
         //pos = R*0.5 + pos*0.1;
         ivec2 p = ivec2(pos);
 
-        vec4 data = texel(bufferB, pos);
+        vec4 data = texelFetch(bufferB, ivec2(mod(pos, R)), 0);
         particle P = getParticle(data, pos);
 
         //border render
